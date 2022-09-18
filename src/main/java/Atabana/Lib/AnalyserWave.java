@@ -47,6 +47,11 @@ public class AnalyserWave implements Analyser, AnalyserWindow{
         res.put("Analyser", "Wave"); // Name of Analyser
         res.put("Values", "int"); //Type of values in ArrayList
         res.put("Chunk size", chunkSize); //Chunk size in output array vs input array
+        res.put("Average", output.stream().
+                map(e -> (Integer) e).
+                mapToInt(Integer::intValue).
+                average().
+                getAsDouble());
         res.put("GraphName", "Sound wave graph"); //name for output graph
         res.put("End", output.size()); //Position of last value
         return res;

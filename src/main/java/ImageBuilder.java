@@ -103,7 +103,6 @@ public class ImageBuilder {
             xPrev = x;
             yPrev = y;
         }
-        System.out.println(data);
 
         //Prepare text
         chart.setColor(Color.WHITE);

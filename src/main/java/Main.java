@@ -14,7 +14,7 @@ public class Main {
     //Main - remove before deploy
     public static void main(String[] args) throws Exception {
         final int graphWidth = 1000;
-        final int graphHeight = 400;
+        final int graphHeight = 300;
 
 
 
@@ -32,22 +32,27 @@ public class Main {
         InputStream inFile = Files.newInputStream(testFile);
         byte[] bytes = inFile.readAllBytes();
         Atabana music = new Atabana(filename, bytes);
-
-        Map<String> analysers = new ArrayList<>();
-//        String analyserName = "ZeroCross";
-        analysers.add()String analyserName = "Wave";
-//        String analyserName = "SimpleSoundPower";
-
-
         System.out.println(music.getFileData());
-        ArrayList<?> graphData= music.getAnalyserArray(analyserName);
-        Map<String, Object> map = music.getAnalyserParameters(analyserName);
-        System.out.println(map.toString());
-            //Sound wave graph creation
-        ImageBuilder imageBuilder = new ImageBuilder(graphData, map,graphWidth,graphHeight);
-        new GraphBuilder(imageBuilder.getGraph(), graphHeight, graphWidth).showGraph();
 
-        System.out.println("/n Finished !");
+
+        ArrayList<GraphObject> graphs = new ArrayList<>();
+        graphs.add(new GraphObject("Wave"));
+        graphs.add(new GraphObject("ZeroCross"));
+        graphs.add(new GraphObject("SimpleSoundPower"));
+
+        for (GraphObject item: graphs) {
+            item.graphData = music.getAnalyserArray(item.name);
+            item.graphParams = music.getAnalyserParameters(item.name);
+            System.out.println(item.graphParams.toString());
+            item.graph = new ImageBuilder(item.graphData, item.graphParams, graphWidth, graphHeight).getGraph();
+        }
+
+            //Sound wave graph creation
+        new GraphBuilder(graphs, graphHeight, graphWidth).showGraphs();
+
+        System.out.println(" ATABANA finished !");
     }
+
+
 
 }

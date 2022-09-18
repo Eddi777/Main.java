@@ -83,7 +83,6 @@ public class AnalyserSimpleSoundPower implements Analyser, AnalyserWindow {
         int maxPower = Arrays.stream(source.getWaveArray()).
                 map(e -> Math.abs(e)).
                 max().getAsInt();
-        System.out.println(maxPower);
         output = new ArrayList<>();
         int i = chunkSize;
         try {
