@@ -11,4 +11,6 @@ public interface Analyser {
     boolean isReady();
     Map<String, Object> getParameters() throws Exception;
     ArrayList<Object> getArray() throws Exception;
+
+
 }

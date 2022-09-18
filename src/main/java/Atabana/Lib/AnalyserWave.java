@@ -7,7 +7,7 @@ import java.util.stream.IntStream;
 Sound analyser for wave data
  */
 
-public class AnalyserWave implements Analyser, WindowAnalyser {
+public class AnalyserWave implements Analyser, AnalyserWindow{
 
     private int[] input; //Integer array with row data (wave array)
     private int posStart; //Start position for wave window
