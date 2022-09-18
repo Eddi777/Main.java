@@ -1,5 +1,6 @@
 package Atabana.Lib;
 
+import Atabana.Atabana;
 import Atabana.Lib.Libs.SoundChunk;
 
 import java.util.*;
@@ -12,28 +13,23 @@ public class AnalyserWave implements Analyser, AnalyserWindow{
 
         //Constants
     private static final SoundChunk SOUND_CHUNK = SoundChunk.ONE_BYTE;
-        //Object variables
-    private int[] input; //Integer array with row data (wave array)
-    private int posStart; //Start position for wave window
-    private int posEnd; //Start position for wave window
+        //Variables
+    private final Atabana source;
+    private int posStart = 0; //Start position for wave window
+    private int posEnd = 0; //Final position for wave window
     private int chunkSize; //Chunk size in output array vs input array
-    private int frequency; //Sample rate (sound frequency) in kHz.
+        //Output
     private ArrayList<Object> output; //return data - list of Objects (type is indicates in Parameters), could be 2D (array) and 3D (array of arrays
-
     private boolean isReady = false; //Flag that this Analyser have filled by necessary data
 
-    @Override
-    public void setAnalyser(final int[] data, int sampleRate) {
-        this.input = data;
-        this.posStart = 0;
-        this.posEnd = data.length;
-        this.frequency = sampleRate;
-        this.chunkSize = SoundChunk.getChunkSize(SOUND_CHUNK, frequency);
+    public AnalyserWave(Atabana source) {
+        this.source = source;
     }
 
     private void execute() throws Exception {
+        this.chunkSize = SoundChunk.getChunkSize(SOUND_CHUNK, source.getSampleRate());
         try {
-            output = (ArrayList<Object>) Arrays.stream(input).
+            output = (ArrayList<Object>) Arrays.stream(source.getWaveArray()).
                     mapToObj(e -> (Object) e). //Transfer to Object type
                             collect(Collectors.toList());
         } catch (Exception e) {
@@ -51,8 +47,7 @@ public class AnalyserWave implements Analyser, AnalyserWindow{
         res.put("Analyser", "Wave"); // Name of Analyser
         res.put("Values", "int"); //Type of values in ArrayList
         res.put("Chunk size", chunkSize); //Chunk size in output array vs input array
-        res.put("GraphName", "Simple wave graph"); //name for output graph
-        res.put("Start", 0); //Position of 1st value
+        res.put("GraphName", "Sound wave graph"); //name for output graph
         res.put("End", output.size()); //Position of last value
         return res;
     }

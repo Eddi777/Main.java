@@ -5,7 +5,7 @@ import Atabana.Lib.Libs.Endian;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class ReadFileWAVEfmt1 implements ReadFile{
+public class ReadFileWAVE implements ReadFile{
 
     private final int HEADER_SIZE = 44; // There are 44 bytes before the data section in WAV
     private byte[] rowFileByteArray;

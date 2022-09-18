@@ -39,6 +39,19 @@ public class Atabana {
         }
     }
 
+    public int[] getWaveArray() {
+        return waveArray;
+    }
+    public int getSampleRate() {
+        return sampleRate;
+    }
+    public int getBitsPerSample() {
+        return bitsPerSample;
+    }
+    public int getNumChannels() {
+        return numChannels;
+    }
+
     public String getFileData() {
         return "FileName" + fileName + "\n" +
                 "AudioFormat " + audioFormat + "\n" +
@@ -61,19 +74,19 @@ public class Atabana {
     public Analyser getAnalyser(String analyserName) throws Exception {
             //Fulfill list of analysers
         if (analysers.isEmpty()) {
-            analysers.put("Wave", new AnalyserWave());
-            analysers.put("ZeroCross", new AnalyserZeroCross());
+            analysers.put("Wave", new AnalyserWave(this));
+            analysers.put("ZeroCross", new AnalyserZeroCross(this));
+            analysers.put("SimpleSoundPower", new AnalyserSimpleSoundPower(this));
 
             /*
                 Add future sound analysers
              */
 
-            //Analysers initialization
+            //Check analysers
             for (String name: analysers.keySet()) {
                 if (analysers.get(name) == null) {
                     throw new Exception("Analyser is not serviceable: " + name);
                 }
-                analysers.get(name).setAnalyser(waveArray, sampleRate);
             }
         }
             //Get requested analyser
@@ -92,7 +105,7 @@ public class Atabana {
         }
         List<ReadFile> list = new ArrayList<>();
         list.add(new ReadFileWAVEfmt2());
-        list.add(new ReadFileWAVEfmt1());
+        list.add(new ReadFileWAVE());
 
         /*
             Add file conveter to the list

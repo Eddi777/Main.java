@@ -2,10 +2,12 @@ package Atabana.Lib.Libs;
 
 public enum SoundChunk {
     ONE_BYTE (1), //Special chunk size for 1 byte time
-    EXTRA_SHORT (10), //Shortest limit of hearing any sound
+    EXTRA_SHORT (10), //Shortest time limit of hearing any sound
     SHORT (100),
     MIDDLE (250), //limit to recognise sound parameters
-    LARGE (500) //limit to understand pronunciation
+    LARGE (500), //limit to understand pronunciation
+    EXTRA_LARGE (1000), //limit to understand pronunciation
+    LONG (2500) //limit to understand pronunciation
     ;
     private final int time;
 
