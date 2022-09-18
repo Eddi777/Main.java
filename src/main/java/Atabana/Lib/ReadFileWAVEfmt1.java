@@ -37,10 +37,9 @@ public class ReadFileWAVEfmt1 implements ReadFile{
         int posWaveArray = 0;
         int[] waveArray = new int[rowFileByteArray.length / step];
         while (posRowFile < rowFileByteArray.length) {
-            waveArray[posWaveArray] =
-                    (ReadFile.intFromByteArray(
+            waveArray[posWaveArray] = ReadFile.intFromByteArray(
                             Arrays.copyOfRange(rowFileByteArray,posRowFile,posRowFile + bytesPerSample),
-                            Endian.LITTLE, false));
+                            Endian.LITTLE, false);
             posWaveArray++;
             posRowFile += step;
         }

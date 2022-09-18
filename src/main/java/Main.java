@@ -23,11 +23,12 @@ public class Main {
         byte[] bytes = inFile.readAllBytes();
         Atabana music = new Atabana(filename, bytes);
 
+        String analyserName = "ZeroCross";
         System.out.println(music.getFileData());
-        System.out.println(music.getAnalyserParameters("Wave").toString());
+        System.out.println(music.getAnalyserParameters(analyserName).toString());
             //Sound wave graph creation
-        ArrayList<?> graphData= music.getAnalyserArray("Wave");
-        ChartCreatorLine graph = new ChartCreatorLine(graphData,1000,400);
+        ArrayList<?> graphData= music.getAnalyserArray(analyserName);
+        ChartCreatorLine graph = new ChartCreatorLine(graphData, analyserName,1000,400);
         graph.showGraph();
 
         System.out.println("/n Finished !");

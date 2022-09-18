@@ -13,13 +13,15 @@ public class ChartCreatorLine {
     private int graphHeight;
     private int graphWidth;
 
+    private String graphName;
+
     private BufferedImage graph;
 
     private int posStart;
     private int posEnd;
     private boolean isGraphReady = false;
 
-    public ChartCreatorLine(ArrayList<?> data, int graphWidth, int graphHeight) {
+    public ChartCreatorLine(ArrayList<?> data, String name, int graphWidth, int graphHeight) {
         int[] array = new int[data.size()];
         for (int i = 0; i < data.size(); i++) {
             array[i] = ((Integer) data.get(i));
@@ -29,6 +31,7 @@ public class ChartCreatorLine {
         this.posEnd = this.data.length;
         this.graphHeight = graphHeight;
         this.graphWidth = graphWidth;
+        this.graphName = name;
         graph = new BufferedImage(this.graphWidth, this.graphHeight, BufferedImage.TYPE_INT_RGB);
     }
 
@@ -65,11 +68,15 @@ public class ChartCreatorLine {
             xPrev = x;
             yPrev = y;
         }
-        //Prepare axis
+            //Prepare axis and text
         chart.setColor(Color.WHITE);
+
+        chart.drawString(String.valueOf(min), 10, 10);
+        chart.drawString(String.valueOf(max), 10, graphHeight - 50);
+        chart.drawString(graphName, graphWidth / 2 - 200, 15);
+
         y = (int) (graphHeight * ((double) - min / (double) (max - min)));
         chart.drawLine(0, y, graphWidth, y);
-        chart.drawString("Wave line", 15, 15);
 
         chart.dispose();
         isGraphReady = true;
