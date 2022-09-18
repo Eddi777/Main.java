@@ -69,11 +69,14 @@ public class ChartCreatorLine {
             chart.setColor(Color.GRAY);
             y = (int) (graphHeight * ((max - averageValue) / (max - min)));
             chart.drawLine(0, y, graphWidth, y);
+            chart.setColor(Color.WHITE);
+            chart.drawString("Average: " + ((int) averageValue), 10, y - 10);
         } else {
                 //Draw zero line
             chart.setColor(Color.WHITE);
             y = (int) (graphHeight * ((double) max / (max - min)));
             chart.drawLine(0, y, graphWidth, y);
+            chart.drawString("Zero", 10, y - 10);
         }
 
 

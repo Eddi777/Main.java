@@ -18,6 +18,8 @@ public class AnalyserZeroCross implements Analyser, AnalyserWindow{
     private int posStart; //Start position for wave window
     private int posEnd; //Start position for wave window
     private int chunkSize; //Chunk size in output array vs input array
+
+    private int frequency; //Sound frequency (sample rate)
     private ArrayList<Object> output; //return data - list of Objects (type is indicates in Parameters), could be 2D (array) and 3D (array of arrays
 
     private boolean isReady = false; //Flag that this Analyser have filled by necessary data
@@ -27,7 +29,8 @@ public class AnalyserZeroCross implements Analyser, AnalyserWindow{
         this.input = data;
         this.posStart = 0;
         this.posEnd = data.length;
-        this.chunkSize = SoundChunk.getChunkSize(SOUND_CHUNK, sampleRate);
+        this.frequency = sampleRate;
+        this.chunkSize = SoundChunk.getChunkSize(SOUND_CHUNK, frequency);
         isReady = false;
     }
 
@@ -45,6 +48,7 @@ public class AnalyserZeroCross implements Analyser, AnalyserWindow{
                 mapToInt(Integer::intValue).
                 average().
                 getAsDouble());
+        res.put("GraphName", "Zero cross frequency, Hz"); //name for output graph
         res.put("Start", 0); //Position of 1st value
         res.put("End", output.size()); //Position of last value
         return res;
@@ -108,6 +112,6 @@ public class AnalyserZeroCross implements Analyser, AnalyserWindow{
             }
             prev = subArray[i];
         }
-        return count;
+        return count * frequency / chunkSize;
     }
 }

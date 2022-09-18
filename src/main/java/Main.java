@@ -34,7 +34,7 @@ public class Main {
         if (map.containsKey("Average")) {
             graph = new ChartCreatorLine(
                     graphData,
-                    analyserName,
+                    map.get("GraphName").toString(),
                     1000,
                     400,
                      (double) map.get("Average"));

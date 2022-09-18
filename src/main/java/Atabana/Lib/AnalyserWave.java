@@ -51,6 +51,7 @@ public class AnalyserWave implements Analyser, AnalyserWindow{
         res.put("Analyser", "Wave"); // Name of Analyser
         res.put("Values", "int"); //Type of values in ArrayList
         res.put("Chunk size", chunkSize); //Chunk size in output array vs input array
+        res.put("GraphName", "Simple wave graph"); //name for output graph
         res.put("Start", 0); //Position of 1st value
         res.put("End", output.size()); //Position of last value
         return res;
