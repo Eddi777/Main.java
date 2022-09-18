@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class Main {
 
@@ -24,11 +25,26 @@ public class Main {
         Atabana music = new Atabana(filename, bytes);
 
         String analyserName = "ZeroCross";
+        Map<String, Object> map = music.getAnalyserParameters(analyserName);
         System.out.println(music.getFileData());
-        System.out.println(music.getAnalyserParameters(analyserName).toString());
+        System.out.println(map.toString());
             //Sound wave graph creation
         ArrayList<?> graphData= music.getAnalyserArray(analyserName);
-        ChartCreatorLine graph = new ChartCreatorLine(graphData, analyserName,1000,400);
+        ChartCreatorLine graph;
+        if (map.containsKey("Average")) {
+            graph = new ChartCreatorLine(
+                    graphData,
+                    analyserName,
+                    1000,
+                    400,
+                     (double) map.get("Average"));
+        } else {
+            graph = new ChartCreatorLine(
+                    graphData,
+                    analyserName,
+                    1000,
+                    400);
+        }
         graph.showGraph();
 
         System.out.println("/n Finished !");

@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class AnalyserZeroCross implements Analyser, AnalyserWindow{
 
@@ -39,6 +40,11 @@ public class AnalyserZeroCross implements Analyser, AnalyserWindow{
         res.put("Analyser", "ZeroCross"); // Name of Analyser
         res.put("Values", "int"); //Type of values in ArrayList
         res.put("Chunk size", chunkSize); //Chunk size in output array vs input array
+        res.put("Average", output.stream().
+                map(e -> (Integer) e).
+                mapToInt(Integer::intValue).
+                average().
+                getAsDouble());
         res.put("Start", 0); //Position of 1st value
         res.put("End", output.size()); //Position of last value
         return res;

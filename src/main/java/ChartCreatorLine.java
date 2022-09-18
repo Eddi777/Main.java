@@ -12,34 +12,24 @@ public class ChartCreatorLine {
     private final int[] data;
     private int graphHeight;
     private int graphWidth;
+    private double averageValue;
 
     private String graphName;
-
     private BufferedImage graph;
 
-    private int posStart;
-    private int posEnd;
     private boolean isGraphReady = false;
 
     public ChartCreatorLine(ArrayList<?> data, String name, int graphWidth, int graphHeight) {
-        int[] array = new int[data.size()];
-        for (int i = 0; i < data.size(); i++) {
-            array[i] = ((Integer) data.get(i));
-        }
-        this.data = array;
-        this.posStart = 0;
-        this.posEnd = this.data.length;
+        this(data, name, graphWidth, graphHeight, 0);
+    }
+
+    public ChartCreatorLine(ArrayList<?> data, String name, int graphWidth, int graphHeight, double average) {
+        this.data = data.stream().map(e -> (Integer) e).mapToInt(Integer::new).toArray();
         this.graphHeight = graphHeight;
         this.graphWidth = graphWidth;
         this.graphName = name;
+        this.averageValue = average;
         graph = new BufferedImage(this.graphWidth, this.graphHeight, BufferedImage.TYPE_INT_RGB);
-    }
-
-    public void setCanvasSize(int width, int height) {
-        graphHeight = height;
-        graphWidth = width;
-        graph = new BufferedImage(this.graphWidth, this.graphHeight, BufferedImage.TYPE_INT_RGB);
-        isGraphReady = false;
     }
 
     public BufferedImage getGraph() {
@@ -59,24 +49,33 @@ public class ChartCreatorLine {
         int x;
         int y;
         int xPrev = 0;
-        int yPrev = (int) (graphHeight * ((double) (data[posStart] - min) / ((double) (max - min))));
+        int yPrev = (int) (graphHeight * ((double) (max - data[0]) / (max - min)));
 
-        for (int i = posStart + 1; i < posEnd; i++) {
-            x = (int) (graphWidth * (((double) i - (double) posStart) / ((double) posEnd - (double) posStart)));
-            y = (int) (graphHeight * ((double) (data[i] - min) / ((double) (max - min))));
+        for (int i = 1; i < data.length; i++) {
+            x = (int) (graphWidth * ((double) i / data.length));
+            y = (int) (graphHeight * ((double) (max - data[i]) / (max - min)));
             chart.drawLine(xPrev, yPrev, x, y);
             xPrev = x;
             yPrev = y;
         }
-            //Prepare axis and text
+            //Prepare text
         chart.setColor(Color.WHITE);
-
-        chart.drawString(String.valueOf(min), 10, 10);
-        chart.drawString(String.valueOf(max), 10, graphHeight - 50);
+        chart.drawString(String.valueOf(max), 10, 10);
+        chart.drawString(String.valueOf(min), 10, graphHeight - 50);
         chart.drawString(graphName, graphWidth / 2 - 200, 15);
 
-        y = (int) (graphHeight * ((double) - min / (double) (max - min)));
-        chart.drawLine(0, y, graphWidth, y);
+        if ((min >= 0) && (max > 0 )) {
+                //Draw average line
+            chart.setColor(Color.GRAY);
+            y = (int) (graphHeight * ((max - averageValue) / (max - min)));
+            chart.drawLine(0, y, graphWidth, y);
+        } else {
+                //Draw zero line
+            chart.setColor(Color.WHITE);
+            y = (int) (graphHeight * ((double) max / (max - min)));
+            chart.drawLine(0, y, graphWidth, y);
+        }
+
 
         chart.dispose();
         isGraphReady = true;

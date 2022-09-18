@@ -39,13 +39,6 @@ public class Atabana {
         }
     }
 
-    //Расчет продолжительности звуковых байт - Сhunks
-    private int SoundtimeToChunkConvert(int soundTime) {
-        int res = soundTime * this.sampleRate / 1000;
-        int base = (int) Math.round(Math.log(res)/Math.log(2));
-        return (int) Math.pow(2, base);
-    }
-
     public String getFileData() {
         return "FileName" + fileName + "\n" +
                 "AudioFormat " + audioFormat + "\n" +
