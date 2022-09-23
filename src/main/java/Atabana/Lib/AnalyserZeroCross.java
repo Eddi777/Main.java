@@ -36,6 +36,7 @@ public class AnalyserZeroCross implements Analyser, AnalyserWindow{
         res.put("Analyser", "ZeroCross"); // Name of Analyser
         res.put("Values", "int"); //Type of values in ArrayList
         res.put("Chunk size", chunkSize); //Chunk size in output array vs input array
+        res.put("Graph", "GraphImageSoundWave"); //Name of recommended graph image creator
         res.put("Average", output.stream().
                 map(e -> (Integer) e).
                 mapToInt(Integer::intValue).
@@ -83,7 +84,7 @@ public class AnalyserZeroCross implements Analyser, AnalyserWindow{
         try {
             while (i <= source.getWaveArray().length) {
                 output.add(countZeroCross(i));
-                i += chunkSize / 2;
+                i += chunkSize / source.getChunkDevider();
             }
         } catch (Exception e) {
             throw new Exception("Internal exception in the analyser - " + this.getClass());
@@ -92,11 +93,11 @@ public class AnalyserZeroCross implements Analyser, AnalyserWindow{
         this.isReady = true;
     }
 
-    private Integer countZeroCross(int chunkLast) {
+    private Integer countZeroCross(int chunkLastPos) {
         int[] subArray = Arrays.copyOfRange(
                 source.getWaveArray(),
-                chunkLast - chunkSize,
-                chunkLast);
+                chunkLastPos - chunkSize,
+                chunkLastPos);
         int count = 0;
         int prev = subArray[0];
         for (int i = 1; i < subArray.length; i++) {

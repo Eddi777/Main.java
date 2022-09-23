@@ -2,6 +2,7 @@ package Atabana;
 
 import Atabana.Lib.*;
 
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,6 +16,7 @@ public class Atabana {
     private boolean prepared = false; //Atabana object is prepared for usage mark
     private final Map<String, Analyser> analysers = new HashMap<>();
     private final ReadFile readFile;
+    private final int chunkDevider = 2; //делитель блоков для Chunks 2, 4, 8
 
     //AudioFile data
     private final int[] waveArray; //Arrray with music wave data bytes
@@ -23,6 +25,9 @@ public class Atabana {
     private final int bitsPerSample; //Number of bits per sample - Sound altitude steps
     private final int numChannels; // Number of sound channels, mono -1, stereo - 2. (v1. works only in mono)
 
+    //Graph image sizes
+    private int graphHeight = 200; //Height of the simple graph
+    private int graphWidth = 1000; //Height of the simple graph
 
     public Atabana(String filename, byte[] rowFileByteArray) throws Exception {
         this.fileName = filename;
@@ -51,6 +56,9 @@ public class Atabana {
     public int getNumChannels() {
         return numChannels;
     }
+    public int getChunkDevider() {
+        return chunkDevider;
+    }
 
     public String getFileData() {
         return "FileName" + fileName + "\n" +
@@ -62,39 +70,36 @@ public class Atabana {
     }
 
     public Map<String, Object> getAnalyserParameters(String analyserName) throws Exception {
-        Analyser analyser = getAnalyser(analyserName);
-        return analyser.getParameters();
+        fillAnalysersMap();
+        return analysers.get(analyserName).getParameters();
     }
 
     public ArrayList<?> getAnalyserArray (String analyserName) throws Exception {
-        Analyser analyser = getAnalyser(analyserName);
-        return analyser.getArray();
+        fillAnalysersMap();
+        return analysers.get(analyserName).getArray();
     }
 
-    public Analyser getAnalyser(String analyserName) throws Exception {
-            //Fulfill list of analysers
+    public Analyser getAnalyser (String analyserName) throws Exception {
+        fillAnalysersMap();
+        return analysers.get(analyserName);
+    }
+
+    private void fillAnalysersMap() throws Exception {
         if (analysers.isEmpty()) {
             analysers.put("Wave", new AnalyserWave(this));
             analysers.put("ZeroCross", new AnalyserZeroCross(this));
             analysers.put("SimpleSoundPower", new AnalyserSimpleSoundPower(this));
+            analysers.put("AnalyserSpectrogram", new AnalyserSpectrogram(this));
 
-            /*
-                Add future sound analysers
-             */
 
-            //Check analysers
-            for (String name: analysers.keySet()) {
-                if (analysers.get(name) == null) {
-                    throw new Exception("Analyser is not serviceable: " + name);
-                }
-            }
+                /*
+                    Add future sound analysers
+                 */
+
         }
-            //Get requested analyser
-        if (!analysers.containsKey(analyserName)) {
-            throw new Exception("Analyser name is not correct: " + analyserName);
-        }
-        return analysers.get(analyserName);
     }
+
+
     public void setWindow(int posStart, int posEnd) {
         //Next step, need to be able to set window of Analysers
     }
@@ -119,5 +124,37 @@ public class Atabana {
         }
         throw new Exception("File format is not supported");
     }
+
+    public void setGraphSize (int height, int width) {
+        this.graphHeight = height;
+        this.graphWidth = width;
+    }
+
+    public BufferedImage getGraphImage (String graphImageName, Analyser analyser) throws Exception {
+        GraphImage graph;
+        switch (graphImageName){
+            case "GraphImageSoundWave":
+                graph = new GraphImageSoundWave();
+                break;
+            case "GraphImageSimpleSoundPower":
+                graph = new GraphImageSimpleSoundPower();
+                break;
+            case "GraphImageSpectrogram":
+                graph = new GraphImageSpectrogram();
+                break;
+            default:
+                throw new Exception("Graph image is not supported " + graphImageName);
+        }
+        graph.setGraphImage(analyser.getArray(), analyser.getParameters(), graphWidth, graphHeight);
+        return graph.getGraph();
+    }
+
+    public BufferedImage getGraphImage (Analyser analyser) throws Exception {
+        return getGraphImage(
+                (String) analyser.getParameters().get("Graph"),
+                analyser);
+    }
+
+
 }
 

@@ -13,7 +13,7 @@ import java.util.Map;
 public class AnalyserSimpleSoundPower implements Analyser, AnalyserWindow {
 
         //Constants
-    private static final SoundChunk SOUND_CHUNK = SoundChunk.LARGE;
+    private static final SoundChunk SOUND_CHUNK = SoundChunk.SHORT;
     private final Atabana source; //Источник данных
 
         //Variables
@@ -38,6 +38,7 @@ public class AnalyserSimpleSoundPower implements Analyser, AnalyserWindow {
         res.put("Analyser", "SimpleSoundPower"); // Name of Analyser
         res.put("Values", "double"); //Type of values in ArrayList
         res.put("Chunk size", chunkSize); //Chunk size in output array vs input array
+        res.put("Graph", "GraphImageSimpleSoundPower"); //Name of recommended graph image creator
         res.put("Average", output.stream().
                 map(e -> (Double) e).
                 mapToDouble(Double::new).
@@ -88,7 +89,7 @@ public class AnalyserSimpleSoundPower implements Analyser, AnalyserWindow {
         try {
             while (i <= source.getWaveArray().length) {
                 output.add(countZeroCross(i, maxPower));
-                i += chunkSize / 2;
+                i += chunkSize / source.getChunkDevider();
             }
         } catch (Exception e) {
             throw new Exception("Internal exception in the analyser - " + this.getClass());
@@ -102,7 +103,7 @@ public class AnalyserSimpleSoundPower implements Analyser, AnalyserWindow {
                 chunkLast - chunkSize,
                 chunkLast);
         double average = ((double) Arrays.stream(subArray).map(e -> Math.abs(e)).sum()) / ((double) chunkSize);
-        Double res = 10 * Math.log10(average/maxPower);
-        return (Double.isInfinite(res) || res < -30) ? -30.0 : res;
+        Double res = 10 * Math.log10(Math.pow(average/maxPower, 2));
+        return (Double.isInfinite(res) || res < -60) ? -60.0 : res;
     }
 }

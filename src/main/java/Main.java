@@ -11,6 +11,7 @@ import java.util.Map;
 
 public class Main {
 
+
     //Main - remove before deploy
     public static void main(String[] args) throws Exception {
         final int graphWidth = 1000;
@@ -34,23 +35,30 @@ public class Main {
         Atabana music = new Atabana(filename, bytes);
         System.out.println(music.getFileData());
 
-
         ArrayList<GraphObject> graphs = new ArrayList<>();
+        music.setGraphSize(graphHeight, graphWidth);
         graphs.add(new GraphObject("Wave"));
         graphs.add(new GraphObject("ZeroCross"));
-        graphs.add(new GraphObject("SimpleSoundPower"));
+//        graphs.add(new GraphObject("SimpleSoundPower"));
+        graphs.add(new GraphObject("AnalyserSpectrogram"));
+
 
         for (GraphObject item: graphs) {
+            item.analyser = music.getAnalyser(item.name);
             item.graphData = music.getAnalyserArray(item.name);
             item.graphParams = music.getAnalyserParameters(item.name);
             System.out.println(item.graphParams.toString());
-            item.graph = new ImageBuilder(item.graphData, item.graphParams, graphWidth, graphHeight).getGraph();
+            item.graph = music.getGraphImage(
+                    (String) item.graphParams.get("Graph"),
+                    item.analyser);
+
+//            item.graph = new ImageBuilder(item.graphData, item.graphParams, graphWidth, graphHeight).getGraph();
         }
 
             //Sound wave graph creation
         new GraphBuilder(graphs, graphHeight, graphWidth).showGraphs();
 
-        System.out.println(" ATABANA finished !");
+        System.out.println(" ATABANA finished ! ");
     }
 
 

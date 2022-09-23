@@ -10,11 +10,10 @@ Sound analyser for wave data
  */
 
 public class AnalyserWave implements Analyser, AnalyserWindow{
-
         //Constants
-    private static final SoundChunk SOUND_CHUNK = SoundChunk.ONE_BYTE;
-        //Variables
+    private final SoundChunk SOUND_CHUNK = SoundChunk.ONE_BYTE;
     private final Atabana source;
+    //Variables
     private int posStart = 0; //Start position for wave window
     private int posEnd = 0; //Final position for wave window
     private int chunkSize; //Chunk size in output array vs input array
@@ -47,6 +46,7 @@ public class AnalyserWave implements Analyser, AnalyserWindow{
         res.put("Analyser", "Wave"); // Name of Analyser
         res.put("Values", "int"); //Type of values in ArrayList
         res.put("Chunk size", chunkSize); //Chunk size in output array vs input array
+        res.put("Graph", "GraphImageSoundWave"); //Name of recommended graph image creator
         res.put("Average", output.stream().
                 map(e -> (Integer) e).
                 mapToInt(Integer::intValue).

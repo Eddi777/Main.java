@@ -1,4 +1,5 @@
 import Atabana.Lib.Analyser;
+import Atabana.Lib.GraphImage;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;

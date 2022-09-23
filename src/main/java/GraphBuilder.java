@@ -8,7 +8,6 @@ public class GraphBuilder {
     private int graphHeight;
     private int graphWidth;
     private BufferedImage graph;
-
     private ArrayList<GraphObject> graphs;
 
     private int NumOfGraphs;
