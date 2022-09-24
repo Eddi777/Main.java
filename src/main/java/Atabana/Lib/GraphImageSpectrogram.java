@@ -19,76 +19,67 @@ public class GraphImageSpectrogram extends GraphImage {
     @Override
     protected void createGraphImage() throws Exception {
         boolean logModeEnabled = true;
-//        Graphics2D chart = super.graph.createGraphics();
+        Graphics2D chart = super.graph.createGraphics();
 
 
-        BufferedImage chart = new BufferedImage(super.graphWidth, super.graphHeight, BufferedImage.TYPE_INT_RGB );
+//        BufferedImage chart = new BufferedImage(super.graphWidth, super.graphHeight, BufferedImage.TYPE_INT_RGB );
 
         //Detect max & min values
         double max = data.stream().flatMapToDouble(item -> Arrays.stream((double[]) item)).max().getAsDouble();
-        colorCoeff = (int) (256 / Math.log(Math.abs(max)));
+        colorCoeff = (int) (256 / Math.log(max));
         double min = data.stream().flatMapToDouble(item -> Arrays.stream((double[]) item)).min().getAsDouble();
         int arrayLength = data.size(); //Length of data array
         int arrayHeight = ((double[]) data.get(0)).length; // height of data array
 
+
+        //Normalization of the spectrogram
+        // for future work look at https://knowm.org/exploring-bird-song-with-a-spectrogram-in-java/
+        //Set max & miv value
+//        double maxValue = output.stream().flatMapToDouble(item -> Arrays.stream((double[]) item)).max().getAsDouble();
+//        double minValue = output.stream().flatMapToDouble(item -> Arrays.stream((double[]) item)).min().getAsDouble();
+//        minValue = (minValue == 0) ? 0.00000001 : minValue;
+//        //normalization of the output
+//        for (int x = 0; x < output.size(); x++) {
+//            for (int y = 0; y < ((double[]) output.get(0)).length; y++) {
+//                if (((double[]) output.get(x))[y] <= 0) {
+//                    ((double[]) output.get(x))[y] = minValue;
+//                } else {
+//                    ((double[]) output.get(x))[y] = Math.abs(
+//                            Math.log10(((double[]) output.get(x))[y] / maxValue));
+//                }
+//            }
+//        }
+
+
+
         //Draw graph
         int x;
+        int xPrev = 0;
         int y;
+        int yPrev;
         for (int xArray = 0; xArray < arrayLength; xArray++) {
             x = (int) (graphWidth * (((double) xArray) / arrayLength));
-
+            yPrev = 0;
             for (int yArray = 0; yArray < arrayHeight; yArray++) {
                 if (logModeEnabled) {
-                    y = (int) ((graphHeight - 10) * (1 - Math.log10(yArray+1) / Math.log10(arrayHeight))) + 5;
+                    y = (int) ((graphHeight - 2) * (1 - Math.log10(yArray+1) / Math.log10(arrayHeight))) + 1;
                 } else {
-                    y = (int) ((graphHeight - 10) * (1 - ((double) yArray) / (double) arrayHeight)) + 5;
+                    y = (int) ((graphHeight - 2) * (1 - ((double) yArray) / (double) arrayHeight)) + 1;
                 }
-                chart.setRGB(x, y, getColor(((double[]) data.get(xArray))[yArray]));
-
-
-
+                chart.setColor(getColor(((double[]) data.get(xArray))[yArray]));
+                chart.fillRect(x, y, xPrev, yPrev);
+                yPrev = y;
             }
+            xPrev = x;
         }
-        graph = chart;
-//        Prepare text
-//        chart.setColor(Color.GREEN);
-//        chart.drawString("0", 10, 10);
-//        chart.drawString(String.valueOf(min), 10, graphHeight - 10);
-//        chart.drawString((String) params.get("GraphName"), graphWidth / 2 - 200, 15);
-//        //Draw average line
-//        chart.setColor(Color.GRAY);
-//        y = (int) (graphHeight * ((max - (double) params.get("Average")) / (max - min)));
-//        chart.drawLine(0, y, graphWidth, y);
-//        chart.drawString("Average: " + ((double) params.get("Average")), 10, y - 10);
-//        //Draw borders
-//        chart.setColor(Color.LIGHT_GRAY);
-//        chart.drawLine(0, 0, graphWidth, 0);
-//        chart.drawLine(0, graphHeight-1, graphWidth, graphHeight-1);
-//        //Draw zero line
-//        chart.setColor(Color.YELLOW);
-//        chart.drawLine(0, 0, graphWidth, 0);
-//        chart.dispose();
+//        graph = chart;
+        chart.setColor(Color.WHITE);
+        chart.drawString((String) params.get("GraphName"), graphWidth / 2 - 200, 15);
         isReady = true;
-
-        System.out.println(Arrays.toString((double[]) data.get(10)));
-
     }
 
-    private int getColor(double colorNumber) {
+    private Color getColor(double colorNumber) {
         double magnitude = Math.log(Math.abs(colorNumber)+1);
-        return new Color(0, (int) magnitude*colorCoeff, (int) magnitude*colorCoeff).
-                getRGB();
-
-
-//        if (colorNumber > 5000) {
-//            return Color.RED.getRGB();
-//        } else if (colorNumber > 0) {
-//            return Color.PINK.getRGB();
-//        } else if (colorNumber > -5000) {
-//            return Color.CYAN.getRGB();
-//        } else if (colorNumber < -5000) {
-//            return Color.BLUE.getRGB();
-//        }
-//        return Color.WHITE.getRGB();
+        return new Color(0, (int) magnitude*colorCoeff, (int) magnitude*colorCoeff);
     }
 }

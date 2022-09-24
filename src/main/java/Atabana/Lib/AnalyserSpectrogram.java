@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 public class AnalyserSpectrogram implements Analyser, AnalyserWindow{
 
@@ -102,7 +101,7 @@ public class AnalyserSpectrogram implements Analyser, AnalyserWindow{
                 //FFT Calculation
                 Complex[] spectr = fft.transform(chunkArray, TransformType.FORWARD);
 
-                //get amplitude of spectr numbers and fill output
+                //get absolute amplitude of spectr numbers and fill output
                 double[] outputSpectr = new double[chunkSize/2];
                 for (int j = 0; j < spectr.length/2; j++) {
                     outputSpectr[j] = spectr[0].getArgument() +
@@ -112,12 +111,6 @@ public class AnalyserSpectrogram implements Analyser, AnalyserWindow{
                 }
                 output.add(outputSpectr);
                 i += chunkSize / source.getChunkDevider();
-                k++;
-                if (k == 10 || k == 10) {
-                    System.out.println(Arrays.toString(outputSpectr));
-                    System.out.println(spectr.length);
-                }
-
             }
         } catch (Exception e) {
             throw new Exception("Internal exception in the analyser - " + this.getClass());
@@ -127,6 +120,7 @@ public class AnalyserSpectrogram implements Analyser, AnalyserWindow{
     }
 
     private double[] getWindowFunction(int chunkSize) {
+        //realization of Sin type window function
         double[] wf = new double[chunkSize];
         for (int i = 0; i < chunkSize; i++) {
             wf[i] = Math.sin(Math.PI * i / chunkSize);

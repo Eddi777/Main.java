@@ -16,7 +16,7 @@ public class Atabana {
     private boolean prepared = false; //Atabana object is prepared for usage mark
     private final Map<String, Analyser> analysers = new HashMap<>();
     private final ReadFile readFile;
-    private final int chunkDevider = 2; //делитель блоков для Chunks 2, 4, 8
+    private final int chunkDevider = 4; //делитель блоков для Chunks 2, 4, 8
 
     //AudioFile data
     private final int[] waveArray; //Arrray with music wave data bytes
@@ -26,7 +26,7 @@ public class Atabana {
     private final int numChannels; // Number of sound channels, mono -1, stereo - 2. (v1. works only in mono)
 
     //Graph image sizes
-    private int graphHeight = 200; //Height of the simple graph
+    private int graphHeight = 150; //Height of the simple graph
     private int graphWidth = 1000; //Height of the simple graph
 
     public Atabana(String filename, byte[] rowFileByteArray) throws Exception {
