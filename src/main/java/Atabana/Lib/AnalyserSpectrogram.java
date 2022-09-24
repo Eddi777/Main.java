@@ -2,13 +2,16 @@ package Atabana.Lib;
 
 import Atabana.Atabana;
 import Atabana.Lib.Libs.SoundChunk;
+import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
+import org.apache.commons.math3.transform.TransformType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class AnalyserSpectrogram implements Analyser, AnalyserWindow{
 
@@ -42,6 +45,7 @@ public class AnalyserSpectrogram implements Analyser, AnalyserWindow{
         res.put("Values", "double[]"); //Type of values in ArrayList
         res.put("Chunk size", chunkSize); //Chunk size in output array vs input array
         res.put("Graph", "GraphImageSpectrogram"); //Name of recommended graph image creator
+        res.put("Average", 0.0);
         res.put("GraphName", "Spectrogram"); //name for output graph
         res.put("End", output.size()); //Position of last value
         return res;
@@ -78,29 +82,43 @@ public class AnalyserSpectrogram implements Analyser, AnalyserWindow{
     }
 
     private void execute() throws Exception {
-
-
-
-        this.chunkSize = SoundChunk.getChunkSize(SOUND_CHUNK, source.getSampleRate());
+        chunkSize = SoundChunk.getChunkSize(SOUND_CHUNK, source.getSampleRate());
         output = new ArrayList<>();
-        //Data transmutation to FFT method parameters
-        double[] inputReal = Arrays.stream(source.getWaveArray()).mapToDouble(Double::valueOf).toArray();
-        double[] inputImag = new double[inputReal.length];
-        Arrays.fill(inputImag, 0);
 
-        ArrayList<Double> maxes = new ArrayList<>();
-        ArrayList<Double> mines = new ArrayList<>();
-
-
+        //Window normalization array
+        double[] win = getWindowFunction(chunkSize);
+        int k = 0;
         int i = chunkSize;
         try {
             while (i <= source.getWaveArray().length) {
-                double[] subInputReal = Arrays.copyOfRange(inputReal,i - chunkSize, i);
-                double[] subInputImag = Arrays.copyOfRange(inputImag,i - chunkSize, i);
-                output.add(fft(subInputReal, subInputImag,true));
-                i += chunkSize / source.getChunkDevider();
-            }
+                double[] chunkArray = Arrays.stream(
+                        Arrays.copyOfRange(source.getWaveArray(), i, i+chunkSize)).
+                        mapToDouble(Double::valueOf).
+                        toArray();
+                //window normalization function
+                for (int j = 0; j < chunkSize; j++) {
+                    chunkArray[j] *= win[j];
+                }
+                //FFT Calculation
+                Complex[] spectr = fft.transform(chunkArray, TransformType.FORWARD);
 
+                //get amplitude of spectr numbers and fill output
+                double[] outputSpectr = new double[chunkSize/2];
+                for (int j = 0; j < spectr.length/2; j++) {
+                    outputSpectr[j] = spectr[0].getArgument() +
+                            Math.sqrt(
+                                    Math.pow(spectr[j+1].getArgument(), 2) +
+                                            Math.pow(spectr[j+1].getImaginary(), 2));
+                }
+                output.add(outputSpectr);
+                i += chunkSize / source.getChunkDevider();
+                k++;
+                if (k == 10 || k == 10) {
+                    System.out.println(Arrays.toString(outputSpectr));
+                    System.out.println(spectr.length);
+                }
+
+            }
         } catch (Exception e) {
             throw new Exception("Internal exception in the analyser - " + this.getClass());
         }
@@ -108,134 +126,12 @@ public class AnalyserSpectrogram implements Analyser, AnalyserWindow{
         this.isReady = true;
     }
 
-    /**
-     *     * The module was taken from https://stackoverflow.com/questions/3287518/reliable-and-fast-fft-in-java
-     *
-     * @author Orlando Selenu
-     * Originally written in the Summer of 2008
-     * Based on the algorithms originally published by E. Oran Brigham "The Fast Fourier Transform" 1973, in ALGOL60 and FORTRAN
-     *      *
-     * The Fast Fourier Transform (generic version, with NO optimizations).
-     *
-     * @param inputReal
-     *            an array of length n, the real part
-     * @param inputImag
-     *            an array of length n, the imaginary part
-     * @param DIRECT
-     *            TRUE = direct transform, FALSE = inverse transform
-     * @return a new array of length 2n
-     */
-
-    public static double[] fft(final double[] inputReal, double[] inputImag,
-                               boolean DIRECT) {
-
-        // - n is the dimension of the problem
-        // - nu is its logarithm in base e
-        int n = inputReal.length;
-
-        // If n is a power of 2, then ld is an integer (_without_ decimals)
-        double ld = Math.log(n) / Math.log(2.0);
-
-        // Here I check if n is a power of 2. If exist decimals in ld, I quit
-        // from the function returning null.
-        if (((int) ld) - ld != 0) {
-            System.out.println("The number of elements is not a power of 2.");
-            return null;
+    private double[] getWindowFunction(int chunkSize) {
+        double[] wf = new double[chunkSize];
+        for (int i = 0; i < chunkSize; i++) {
+            wf[i] = Math.sin(Math.PI * i / chunkSize);
         }
+        return wf;
 
-        // Declaration and initialization of the variables
-        // ld should be an integer, actually, so I don't lose any information in
-        // the cast
-        int nu = (int) ld;
-        int n2 = n / 2;
-        int nu1 = nu - 1;
-        double[] xReal = new double[n];
-        double[] xImag = new double[n];
-        double tReal, tImag, p, arg, c, s;
-
-        // Here I check if I'm going to do the direct transform or the inverse
-        // transform.
-        double constant;
-        if (DIRECT)
-            constant = -2 * Math.PI;
-        else
-            constant = 2 * Math.PI;
-
-        // I don't want to overwrite the input arrays, so here I copy them. This
-        // choice adds \Theta(2n) to the complexity.
-        for (int i = 0; i < n; i++) {
-            xReal[i] = inputReal[i];
-            xImag[i] = inputImag[i];
-        }
-
-        // First phase - calculation
-        int k = 0;
-        for (int l = 1; l <= nu; l++) {
-            while (k < n) {
-                for (int i = 1; i <= n2; i++) {
-                    p = bitreverseReference(k >> nu1, nu);
-                    // direct FFT or inverse FFT
-                    arg = constant * p / n;
-                    c = Math.cos(arg);
-                    s = Math.sin(arg);
-                    tReal = xReal[k + n2] * c + xImag[k + n2] * s;
-                    tImag = xImag[k + n2] * c - xReal[k + n2] * s;
-                    xReal[k + n2] = xReal[k] - tReal;
-                    xImag[k + n2] = xImag[k] - tImag;
-                    xReal[k] += tReal;
-                    xImag[k] += tImag;
-                    k++;
-                }
-                k += n2;
-            }
-            k = 0;
-            nu1--;
-            n2 /= 2;
-        }
-
-        // Second phase - recombination
-        k = 0;
-        int r;
-        while (k < n) {
-            r = bitreverseReference(k, nu);
-            if (r > k) {
-                tReal = xReal[k];
-                tImag = xImag[k];
-                xReal[k] = xReal[r];
-                xImag[k] = xImag[r];
-                xReal[r] = tReal;
-                xImag[r] = tImag;
-            }
-            k++;
-        }
-
-        // Here I have to mix xReal and xImag to have an array (yes, it should
-        // be possible to do this stuff in the earlier parts of the code, but
-        // it's here to readibility).
-        double[] newArray = new double[xReal.length * 2];
-        double radice = 1 / Math.sqrt(n);
-        for (int i = 0; i < newArray.length; i += 2) {
-            int i2 = i / 2;
-            // I used Stephen Wolfram's Mathematica as a reference so I'm going
-            // to normalize the output while I'm copying the elements.
-            newArray[i] = xReal[i2] * radice;
-            newArray[i + 1] = xImag[i2] * radice;
-        }
-        return newArray;
-    }
-
-    /**
-     * The reference bit reverse function.
-     */
-    private static int bitreverseReference(int j, int nu) {
-        int j2;
-        int j1 = j;
-        int k = 0;
-        for (int i = 1; i <= nu; i++) {
-            j2 = j1 / 2;
-            k = 2 * k + j1 - 2 * j2;
-            j1 = j2;
-        }
-        return k;
     }
 }

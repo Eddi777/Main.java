@@ -23,8 +23,8 @@ public class Main {
 //        Path testFilePath = Paths.get("C:\\Users\\eduar\\OneDrive\\Documents\\Personal\\YandexMusic\\DataSet\\Sherlock.mp3");
 //        Path testFile = Paths.get("C:\\Users\\eduar\\OneDrive\\Documents\\Personal\\YandexMusic\\DataSet\\archive\\Data\\genres_original\\rock\\rock.00014.wav");
 //        Path testFile = Paths.get("C:\\Users\\eduar\\IdeaProjects\\YandexMusic\\AudioFiles\\Digital Presentation_48000.wav");
-//        Path testFile = Paths.get("C:\\Users\\eduar\\IdeaProjects\\YandexMusic\\AudioFiles\\Wav_868kb.wav");
-        Path testFile = Paths.get("C:\\Users\\eduar\\IdeaProjects\\YandexMusic\\AudioFiles\\Guitar.wav");
+        Path testFile = Paths.get("C:\\Users\\eduar\\IdeaProjects\\YandexMusic\\AudioFiles\\Wav_868kb.wav");
+//        Path testFile = Paths.get("C:\\Users\\eduar\\IdeaProjects\\YandexMusic\\AudioFiles\\Guitar.wav");
 
 
 
@@ -38,8 +38,8 @@ public class Main {
         ArrayList<GraphObject> graphs = new ArrayList<>();
         music.setGraphSize(graphHeight, graphWidth);
         graphs.add(new GraphObject("Wave"));
-        graphs.add(new GraphObject("ZeroCross"));
-//        graphs.add(new GraphObject("SimpleSoundPower"));
+//        graphs.add(new GraphObject("ZeroCross"));
+        graphs.add(new GraphObject("SimpleSoundPower"));
         graphs.add(new GraphObject("AnalyserSpectrogram"));
 
 

@@ -16,7 +16,7 @@ public class GraphImageSimpleSoundPower extends GraphImage {
     @Override
     protected void createGraphImage() throws Exception {
         Graphics2D chart = super.graph.createGraphics();
-        int max = 0;
+        int max = (int) data.stream().map(e -> (double) e).mapToDouble(Double::new).max().getAsDouble();
         int min = (int) data.stream().map(e -> (double) e).mapToDouble(Double::new).min().getAsDouble();
 
         //Draw graph
@@ -36,7 +36,7 @@ public class GraphImageSimpleSoundPower extends GraphImage {
 
         //Prepare text
         chart.setColor(Color.WHITE);
-        chart.drawString("0", 10, 10);
+        chart.drawString(String.valueOf(max), 10, 10);
         chart.drawString(String.valueOf(min), 10, graphHeight - 10);
         chart.drawString((String) params.get("GraphName"), graphWidth / 2 - 200, 15);
         //Draw average line

@@ -14,16 +14,19 @@ import java.util.Arrays;
 
 public class GraphImageSpectrogram extends GraphImage {
 
+    int colorCoeff;
+
     @Override
     protected void createGraphImage() throws Exception {
         boolean logModeEnabled = true;
-        Graphics2D chart = super.graph.createGraphics();
+//        Graphics2D chart = super.graph.createGraphics();
 
 
-//        BufferedImage chart = new BufferedImage(super.graphWidth, super.graphHeight, BufferedImage.TYPE_INT_RGB );
+        BufferedImage chart = new BufferedImage(super.graphWidth, super.graphHeight, BufferedImage.TYPE_INT_RGB );
 
         //Detect max & min values
         double max = data.stream().flatMapToDouble(item -> Arrays.stream((double[]) item)).max().getAsDouble();
+        colorCoeff = (int) (256 / Math.log(Math.abs(max)));
         double min = data.stream().flatMapToDouble(item -> Arrays.stream((double[]) item)).min().getAsDouble();
         int arrayLength = data.size(); //Length of data array
         int arrayHeight = ((double[]) data.get(0)).length; // height of data array
@@ -40,15 +43,13 @@ public class GraphImageSpectrogram extends GraphImage {
                 } else {
                     y = (int) ((graphHeight - 10) * (1 - ((double) yArray) / (double) arrayHeight)) + 5;
                 }
-//                chart.setRGB(x, y, getColor(((double[]) data.get(xArray))[yArray])
+                chart.setRGB(x, y, getColor(((double[]) data.get(xArray))[yArray]));
 
 
-                chart.fillRect();
-                );
 
             }
         }
-//        graph = chart;
+        graph = chart;
 //        Prepare text
 //        chart.setColor(Color.GREEN);
 //        chart.drawString("0", 10, 10);
@@ -68,11 +69,15 @@ public class GraphImageSpectrogram extends GraphImage {
 //        chart.drawLine(0, 0, graphWidth, 0);
 //        chart.dispose();
         isReady = true;
+
+        System.out.println(Arrays.toString((double[]) data.get(10)));
+
     }
 
     private int getColor(double colorNumber) {
         double magnitude = Math.log(Math.abs(colorNumber)+1);
-        return new Color(0, (int) magnitude * 10, (int) magnitude * 20).getRGB();
+        return new Color(0, (int) magnitude*colorCoeff, (int) magnitude*colorCoeff).
+                getRGB();
 
 
 //        if (colorNumber > 5000) {
