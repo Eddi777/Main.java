@@ -28,7 +28,7 @@ public class GraphImageSimpleSoundPower extends GraphImage {
 
         for (int i = 1; i < data.size(); i++) {
             x = (int) (graphWidth * ((double) i / data.size()));
-            y = (int) (graphHeight * ((max - (double) data.get(i)) / (max - min)));
+            y = (int) ((graphHeight-10) * ((max - (double) data.get(i)) / (max - min)))+5;
             chart.drawLine(xPrev, yPrev, x, y);
             xPrev = x;
             yPrev = y;

@@ -102,8 +102,8 @@ public class AnalyserSimpleSoundPower implements Analyser, AnalyserWindow {
                 source.getWaveArray(),
                 chunkLast - chunkSize,
                 chunkLast);
-        double average = ((double) Arrays.stream(subArray).map(e -> Math.abs(e)).sum()) / ((double) chunkSize);
-        Double res = 10 * Math.log10(Math.pow(average/maxPower, 2));
+        double average = (Arrays.stream(subArray).map(e -> Math.abs(e)).average().getAsDouble());
+        Double res = 20 * Math.log10(average/maxPower);
         return (Double.isInfinite(res) || res < -60) ? -60.0 : res;
     }
 }
