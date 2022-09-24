@@ -11,23 +11,27 @@ import java.util.Map;
 
 public class Atabana {
 
+
+
     //Basic settings
     private final String fileName;
     private boolean prepared = false; //Atabana object is prepared for usage mark
     private final Map<String, Analyser> analysers = new HashMap<>();
     private final ReadFile readFile;
-    private final int chunkDevider = 4; //делитель блоков для Chunks 2, 4, 8
 
     //AudioFile data
     private final int[] waveArray; //Arrray with music wave data bytes
     private final String audioFormat; //Audio filename extension
-    private final int sampleRate;  //Sample rate (sound frequency) in kHz.
+    private final int sampleRate;  //Sample rate (sound capture frequency) in kHz.
     private final int bitsPerSample; //Number of bits per sample - Sound altitude steps
     private final int numChannels; // Number of sound channels, mono -1, stereo - 2. (v1. works only in mono)
 
     //Graph image sizes
     private int graphHeight = 150; //Height of the simple graph
     private int graphWidth = 1000; //Height of the simple graph
+    //Global settings
+    private final int chunkDevider = 4; //делитель блоков для Chunks 2, 4, 8
+    private final int maxFrequency = 16000; // максимальная частота спектра для вывода на график
 
     public Atabana(String filename, byte[] rowFileByteArray) throws Exception {
         this.fileName = filename;
@@ -58,6 +62,9 @@ public class Atabana {
     }
     public int getChunkDevider() {
         return chunkDevider;
+    }
+    public int getMaxFrequency() {
+        return maxFrequency;
     }
 
     public String getFileData() {

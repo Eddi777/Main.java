@@ -22,6 +22,7 @@ public class AnalyserSpectrogram implements Analyser, AnalyserWindow{
     private int posStart; //Start position for wave window
     private int posEnd; //Final position for wave window
     private int chunkSize; //Chunk size in output array vs input array
+    int maxFreqArrayItems; //Max quantity of frequencies in output list
 
     private FastFourierTransformer fft = new FastFourierTransformer(DftNormalization.STANDARD);
 
@@ -45,6 +46,8 @@ public class AnalyserSpectrogram implements Analyser, AnalyserWindow{
         res.put("Chunk size", chunkSize); //Chunk size in output array vs input array
         res.put("Graph", "GraphImageSpectrogram"); //Name of recommended graph image creator
         res.put("Average", 0.0);
+        res.put("FrequencyArray", getMaxFrequency());
+        res.put("MaxFrequency", source.getMaxFrequency());
         res.put("GraphName", "Spectrogram"); //name for output graph
         res.put("End", output.size()); //Position of last value
         return res;
@@ -84,9 +87,11 @@ public class AnalyserSpectrogram implements Analyser, AnalyserWindow{
         chunkSize = SoundChunk.getChunkSize(SOUND_CHUNK, source.getSampleRate());
         output = new ArrayList<>();
 
+        //set max quantity of frequencies in output list
+        maxFreqArrayItems = chunkSize * source.getMaxFrequency()/source.getSampleRate();
+
         //Window normalization array
         double[] win = getWindowFunction(chunkSize);
-        int k = 0;
         int i = chunkSize;
         try {
             while (i <= source.getWaveArray().length) {
@@ -99,17 +104,15 @@ public class AnalyserSpectrogram implements Analyser, AnalyserWindow{
                     chunkArray[j] *= win[j];
                 }
                 //FFT Calculation
-                Complex[] spectr = fft.transform(chunkArray, TransformType.FORWARD);
+                Complex[] spectre = fft.transform(chunkArray, TransformType.FORWARD);
 
-                //get absolute amplitude of spectr numbers and fill output
-                double[] outputSpectr = new double[chunkSize/2];
-                for (int j = 0; j < spectr.length/2; j++) {
-                    outputSpectr[j] = spectr[0].getArgument() +
-                            Math.sqrt(
-                                    Math.pow(spectr[j+1].getArgument(), 2) +
-                                            Math.pow(spectr[j+1].getImaginary(), 2));
+                //get absolute amplitude of spectre numbers and fill output
+                double[] outputSpectre = new double[maxFreqArrayItems];
+                for (int j = 1; j <= maxFreqArrayItems; j++) {
+                    outputSpectre[j-1] = Math.sqrt(
+                            Math.pow(spectre[j+1].getArgument(), 2) + Math.pow(spectre[j+1].getImaginary(), 2));
                 }
-                output.add(outputSpectr);
+                output.add(outputSpectre);
                 i += chunkSize / source.getChunkDevider();
             }
         } catch (Exception e) {
@@ -126,6 +129,14 @@ public class AnalyserSpectrogram implements Analyser, AnalyserWindow{
             wf[i] = Math.sin(Math.PI * i / chunkSize);
         }
         return wf;
-
     }
+
+    private int[] getMaxFrequency() {
+        int[] res = new int[maxFreqArrayItems];
+        for (int i = 1; i <= maxFreqArrayItems; i++) {
+            res[i-1] = source.getSampleRate() * i / chunkSize;
+        }
+        return res;
+    }
+
 }

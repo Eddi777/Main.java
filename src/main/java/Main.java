@@ -21,10 +21,10 @@ public class Main {
 
 
 //        Path testFilePath = Paths.get("C:\\Users\\eduar\\OneDrive\\Documents\\Personal\\YandexMusic\\DataSet\\Sherlock.mp3");
-//        Path testFile = Paths.get("C:\\Users\\eduar\\OneDrive\\Documents\\Personal\\YandexMusic\\DataSet\\archive\\Data\\genres_original\\rock\\rock.00014.wav");
+        Path testFile = Paths.get("C:\\Users\\eduar\\OneDrive\\Documents\\Personal\\YandexMusic\\DataSet\\archive\\Data\\genres_original\\rock\\rock.00014.wav");
 //        Path testFile = Paths.get("C:\\Users\\eduar\\IdeaProjects\\YandexMusic\\AudioFiles\\Digital Presentation_48000.wav");
 //        Path testFile = Paths.get("C:\\Users\\eduar\\IdeaProjects\\YandexMusic\\AudioFiles\\Wav_868kb.wav");
-        Path testFile = Paths.get("C:\\Users\\eduar\\IdeaProjects\\YandexMusic\\AudioFiles\\Guitar.wav");
+//        Path testFile = Paths.get("C:\\Users\\eduar\\IdeaProjects\\YandexMusic\\AudioFiles\\Guitar.wav");
 
 
 
@@ -56,7 +56,9 @@ public class Main {
         }
 
             //Sound wave graph creation
-        new GraphBuilder(graphs, graphHeight, graphWidth).showGraphs();
+        GraphBuilder gb = new GraphBuilder(graphs, graphHeight, graphWidth);
+        gb.setTitle(filename);
+        gb.showGraphs();
 
         System.out.println(" ATABANA finished ! ");
     }

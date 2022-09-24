@@ -74,6 +74,8 @@ public class GraphImageSpectrogram extends GraphImage {
         }
 //        graph = chart;
         chart.setColor(Color.WHITE);
+        int[] freqs = (int[]) params.get("FrequencyArray");
+        chart.drawString(String.valueOf(freqs[freqs.length-1]), 10, 10);
         chart.drawString((String) params.get("GraphName"), graphWidth / 2 - 200, 15);
         isReady = true;
     }

@@ -7,6 +7,8 @@ public class GraphBuilder {
 
     private int graphHeight;
     private int graphWidth;
+
+    private String title = "ATABANA GRAPH";
     private BufferedImage graph;
     private ArrayList<GraphObject> graphs;
 
@@ -30,7 +32,7 @@ public class GraphBuilder {
         jFrame.setLayout(new FlowLayout());
 
         jFrame.setSize(graphWidth, graphHeight + 44);
-        jFrame.setTitle("ATABANA GRAPH");
+        jFrame.setTitle(title);
         JLabel jLabel = new JLabel();
 
         jLabel.setIcon(imageIcon);
@@ -73,8 +75,9 @@ public class GraphBuilder {
         jFrame.setResizable(false);
 
         jFrame.setVisible(true);
+    }
 
-
-
+    public void setTitle(String title) {
+        this.title = title;
     }
 }
