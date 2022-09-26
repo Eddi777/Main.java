@@ -8,22 +8,22 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AnalyserZeroCross implements Analyser, AnalyserWindow{
+public class SimpleSoundPowerAnalyser implements Analyser {
 
         //Constants
-    private static final SoundChunk SOUND_CHUNK = SoundChunk.LARGE;
-    private final Atabana source;
+    private static final SoundChunk SOUND_CHUNK = SoundChunk.SHORT;
+    private final Atabana source; //Источник данных
 
-        //Object variables
+        //Variables
     private int posStart; //Start position for wave window
-    private int posEnd; //Final position for wave window
+    private int posEnd; //Start position for wave window
     private int chunkSize; //Chunk size in output array vs input array
 
         //Outputs
     private ArrayList<Object> output; //return data - list of Objects (type is indicates in Parameters), could be 2D (array) and 3D (array of arrays
     private boolean isReady = false; //Flag that this Analyser have filled by necessary data
 
-    public AnalyserZeroCross(Atabana source) {
+    public SimpleSoundPowerAnalyser(Atabana source) {
         this.source = source;
     }
 
@@ -33,16 +33,16 @@ public class AnalyserZeroCross implements Analyser, AnalyserWindow{
             execute();
         }
         Map<String, Object> res = new HashMap<>();
-        res.put("Analyser", "ZeroCross"); // Name of Analyser
-        res.put("Values", "int"); //Type of values in ArrayList
+        res.put("Analyser", "SimpleSoundPower"); // Name of Analyser
+        res.put("Values", "double"); //Type of values in ArrayList
         res.put("Chunk size", chunkSize); //Chunk size in output array vs input array
-        res.put("Graph", "GraphImageSoundWave"); //Name of recommended graph image creator
+        res.put("Graph", "GraphImageSimpleSoundPower"); //Name of recommended graph image creator
         res.put("Average", output.stream().
-                map(e -> (Integer) e).
-                mapToInt(Integer::intValue).
+                map(e -> (Double) e).
+                mapToDouble(Double::new).
                 average().
                 getAsDouble());
-        res.put("GraphName", "Zero cross frequency, Hz"); //name for output graph
+        res.put("GraphName", "Simple sound power, dB"); //name for output graph
         res.put("End", output.size()); //Position of last value
         return res;
     }
@@ -79,37 +79,29 @@ public class AnalyserZeroCross implements Analyser, AnalyserWindow{
 
     private void execute() throws Exception {
         this.chunkSize = SoundChunk.getChunkSize(SOUND_CHUNK, source.getSampleRate());
+        int maxPower = Arrays.stream(source.getWaveArray()).
+                map(e -> Math.abs(e)).
+                max().getAsInt();
         output = new ArrayList<>();
         int i = chunkSize;
         try {
             while (i <= source.getWaveArray().length) {
-                output.add(countZeroCross(i));
+                output.add(countZeroCross(i, maxPower));
                 i += chunkSize / source.getChunkDevider();
             }
         } catch (Exception e) {
             throw new Exception("Internal exception in the analyser - " + this.getClass());
         }
-        this.posEnd = output.size();
         this.isReady = true;
     }
 
-    private Integer countZeroCross(int chunkLastPos) {
+    private double countZeroCross(int chunkLast, int maxPower) {
         int[] subArray = Arrays.copyOfRange(
                 source.getWaveArray(),
-                chunkLastPos - chunkSize,
-                chunkLastPos);
-        int count = 0;
-        int prev = subArray[0];
-        for (int i = 1; i < subArray.length; i++) {
-            if ((prev > 0) && (subArray[i] < 0)) {
-                count ++;
-            } else if ((prev < 0) && (subArray[i] > 0)) {
-                count ++;
-            } else if ((prev !=0) && (subArray[i] == 0)) {
-                count ++;
-            }
-            prev = subArray[i];
-        }
-        return count * source.getSampleRate() / chunkSize;
+                chunkLast - chunkSize,
+                chunkLast);
+        double average = (Arrays.stream(subArray).map(e -> Math.abs(e)).average().getAsDouble());
+        Double res = 20 * Math.log10(average/maxPower);
+        return (Double.isInfinite(res) || res < -60) ? -60.0 : res;
     }
 }

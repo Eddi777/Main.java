@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 Sound analyser for wave data
  */
 
-public class AnalyserWave implements Analyser, AnalyserWindow{
+public class WaveAnalyser implements Analyser {
         //Constants
     private final SoundChunk SOUND_CHUNK = SoundChunk.ONE_BYTE;
     private final Atabana source;
@@ -21,7 +21,7 @@ public class AnalyserWave implements Analyser, AnalyserWindow{
     private ArrayList<Object> output; //return data - list of Objects (type is indicates in Parameters), could be 2D (array) and 3D (array of arrays
     private boolean isReady = false; //Flag that this Analyser have filled by necessary data
 
-    public AnalyserWave(Atabana source) {
+    public WaveAnalyser(Atabana source) {
         this.source = source;
     }
 

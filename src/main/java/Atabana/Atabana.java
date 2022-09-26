@@ -93,10 +93,10 @@ public class Atabana {
 
     private void fillAnalysersMap() throws Exception {
         if (analysers.isEmpty()) {
-            analysers.put("Wave", new AnalyserWave(this));
-            analysers.put("ZeroCross", new AnalyserZeroCross(this));
-            analysers.put("SimpleSoundPower", new AnalyserSimpleSoundPower(this));
-            analysers.put("AnalyserSpectrogram", new AnalyserSpectrogram(this));
+            analysers.put("Wave", new WaveAnalyser(this));
+            analysers.put("ZeroCross", new ZeroCrossAnalyser(this));
+            analysers.put("SimpleSoundPower", new SimpleSoundPowerAnalyser(this));
+            analysers.put("AnalyserSpectrogram", new SpectrogramAnalyser(this));
 
 
                 /*
@@ -118,6 +118,7 @@ public class Atabana {
         List<ReadFile> list = new ArrayList<>();
         list.add(new ReadFileWAVEfmt2());
         list.add(new ReadFileWAVE());
+        list.add(new ReadFileMP3());
 
         /*
             Add file conveter to the list

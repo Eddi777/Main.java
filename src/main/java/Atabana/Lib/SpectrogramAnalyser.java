@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AnalyserSpectrogram implements Analyser, AnalyserWindow{
+public class SpectrogramAnalyser implements Analyser {
 
         //Constants
     private static final SoundChunk SOUND_CHUNK = SoundChunk.EXTRA_SHORT;
@@ -31,7 +31,7 @@ public class AnalyserSpectrogram implements Analyser, AnalyserWindow{
     private ArrayList<Object> output; //return data - list of Objects (type is indicates in Parameters), could be 2D (array) and 3D (array of arrays
     private boolean isReady = false; //Flag that this Analyser have filled by necessary data
 
-    public AnalyserSpectrogram(Atabana source) {
+    public SpectrogramAnalyser(Atabana source) {
         this.source = source;
     }
 
