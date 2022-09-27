@@ -1,12 +1,22 @@
 package Atabana;
 
-import Atabana.Lib.*;
+import Atabana.Analysers.Analyser;
+import Atabana.Analysers.SimpleSoundPowerAnalyser;
+import Atabana.Analysers.SpectrogramAnalyser;
+import Atabana.Analysers.WaveAnalyser;
+import Atabana.Analysers.ZeroCrossAnalyser;
+import Atabana.ChartCreators.AbstractChartCreator;
+import Atabana.ChartCreators.SimpleSoundPowerChartCreator;
+import Atabana.ChartCreators.WaveChartCreator;
+import Atabana.ChartCreators.SpectrogramChartCreator;
+import Atabana.FileReaders.FileReader;
+import Atabana.FileReaders.MP3FileReader;
+import Atabana.FileReaders.WaveFileReader;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Atabana {
@@ -17,7 +27,7 @@ public class Atabana {
     private final String fileName;
     private boolean prepared = false; //Atabana object is prepared for usage mark
     private final Map<String, Analyser> analysers = new HashMap<>();
-    private final ReadFile readFile;
+    private final FileReader fileReader;
 
     //AudioFile data
     private final int[] waveArray; //Arrray with music wave data bytes
@@ -26,6 +36,9 @@ public class Atabana {
     private final int bitsPerSample; //Number of bits per sample - Sound altitude steps
     private final int numChannels; // Number of sound channels, mono -1, stereo - 2. (v1. works only in mono)
 
+    //Window parameters (start & end) too look at charts deeper
+    private int windowStart;
+    private int windowEnd;
     //Graph image sizes
     private int graphHeight = 150; //Height of the simple graph
     private int graphWidth = 1000; //Height of the simple graph
@@ -36,15 +49,15 @@ public class Atabana {
     public Atabana(String filename, byte[] rowFileByteArray) throws Exception {
         this.fileName = filename;
         try {
-            readFile = getReadFile(rowFileByteArray);
-            this.audioFormat = readFile.getFormat();
-            this.numChannels = readFile.getNumChannels();
-            this.sampleRate = readFile.getSampleRate();
-            this.bitsPerSample = readFile.getBitsPerSample();
-            this.waveArray = readFile.getWaveArray();
+            fileReader = getFileReader(rowFileByteArray);
+            this.audioFormat = fileReader.getFormat();
+            this.numChannels = fileReader.getNumChannels();
+            this.sampleRate = fileReader.getSampleRate();
+            this.bitsPerSample = fileReader.getBitsPerSample();
+            this.waveArray = fileReader.getWaveArray();
             this.prepared = true;
         } catch (Exception e) {
-            throw new Exception(filename + " //File format is not supported");
+            throw new Exception("File format is not supported: " + filename);
         }
     }
 
@@ -77,17 +90,32 @@ public class Atabana {
     }
 
     public Map<String, Object> getAnalyserParameters(String analyserName) throws Exception {
-        fillAnalysersMap();
+        if (analysers.isEmpty())
+            fillAnalysersMap();
         return analysers.get(analyserName).getParameters();
     }
 
     public ArrayList<?> getAnalyserArray (String analyserName) throws Exception {
-        fillAnalysersMap();
+        if (analysers.isEmpty())
+            fillAnalysersMap();
         return analysers.get(analyserName).getArray();
     }
 
+    public Map<String, Object> getAnalyserWindowParameters(String analyserName) throws Exception {
+        if (analysers.isEmpty())
+            fillAnalysersMap();
+        return analysers.get(analyserName).getWindowParameters();
+    }
+
+    public ArrayList<?> getAnalyserWindowArray (String analyserName) throws Exception {
+        if (analysers.isEmpty())
+            fillAnalysersMap();
+        return analysers.get(analyserName).getWindowArray();
+    }
+
     public Analyser getAnalyser (String analyserName) throws Exception {
-        fillAnalysersMap();
+        if (analysers.isEmpty())
+            fillAnalysersMap();
         return analysers.get(analyserName);
     }
 
@@ -96,7 +124,7 @@ public class Atabana {
             analysers.put("Wave", new WaveAnalyser(this));
             analysers.put("ZeroCross", new ZeroCrossAnalyser(this));
             analysers.put("SimpleSoundPower", new SimpleSoundPowerAnalyser(this));
-            analysers.put("AnalyserSpectrogram", new SpectrogramAnalyser(this));
+            analysers.put("Spectrogram", new SpectrogramAnalyser(this));
 
 
                 /*
@@ -106,31 +134,36 @@ public class Atabana {
         }
     }
 
-
-    public void setWindow(int posStart, int posEnd) {
-        //Next step, need to be able to set window of Analysers
+    public void setWindow(int posStart, int posEnd) throws Exception {
+        windowStart = posStart;
+        windowEnd = posEnd;
+        if (analysers.isEmpty())
+            fillAnalysersMap();
+        for (Analyser item: analysers.values()) {
+            item.setWindow(windowStart, windowEnd);
+        }
     }
 
-    public ReadFile getReadFile(byte[] rowFileByteArray) throws Exception {
-        if (readFile != null) {
-            return readFile;
+    public FileReader getFileReader(byte[] rowFileByteArray) {
+        if (fileReader != null) {
+            return fileReader;
         }
-        List<ReadFile> list = new ArrayList<>();
-        list.add(new ReadFileWAVEfmt2());
-        list.add(new ReadFileWAVE());
-        list.add(new ReadFileMP3());
-
-        /*
-            Add file conveter to the list
-        */
-
-        for (ReadFile item : list) {
-            if (item.isCorrectFormat(Arrays.copyOf(rowFileByteArray, item.getHeaderSize()))) {
-                item.setRowFileByteArray(rowFileByteArray);
-                return item;
-            }
+        FileReader fr;
+        if (fileName.toLowerCase().endsWith(".wav")) {
+            fr = new WaveFileReader();
+        } else if (fileName.toLowerCase().endsWith(".mp3")) {
+            fr = new MP3FileReader();
+        } else {
+            throw new IllegalArgumentException("Not available file driver " + fileName);
         }
-        throw new Exception("File format is not supported");
+        int headerSize = fr.getHeaderSize();
+        if (headerSize == -1)
+            headerSize = rowFileByteArray.length;
+        if (fr.isCorrectFormat(Arrays.copyOf(rowFileByteArray,headerSize))) {
+            fr.setRowFileByteArray(rowFileByteArray);
+            return fr;
+        }
+        throw new IllegalArgumentException("File format is not supported " + fileName);
     }
 
     public void setGraphSize (int height, int width) {
@@ -138,27 +171,38 @@ public class Atabana {
         this.graphWidth = width;
     }
 
-    public BufferedImage getGraphImage (String graphImageName, Analyser analyser) throws Exception {
-        GraphImage graph;
-        switch (graphImageName){
-            case "GraphImageSoundWave":
-                graph = new GraphImageSoundWave();
+    private AbstractChartCreator getChartCreator(String chartName) throws IllegalStateException {
+        AbstractChartCreator graph;
+        switch (chartName){
+            case "SoundWave":
+                graph = new WaveChartCreator();
                 break;
-            case "GraphImageSimpleSoundPower":
-                graph = new GraphImageSimpleSoundPower();
+            case "SimpleSoundPower":
+                graph = new SimpleSoundPowerChartCreator();
                 break;
-            case "GraphImageSpectrogram":
-                graph = new GraphImageSpectrogram();
+            case "Spectrogram":
+                graph = new SpectrogramChartCreator();
                 break;
             default:
-                throw new Exception("Graph image is not supported " + graphImageName);
+                throw new IllegalStateException("Graph image is not supported " + chartName);
         }
-        graph.setGraphImage(analyser.getArray(), analyser.getParameters(), graphWidth, graphHeight);
-        return graph.getGraph();
+        return graph;
     }
 
-    public BufferedImage getGraphImage (Analyser analyser) throws Exception {
-        return getGraphImage(
+    public BufferedImage getChartImage(String chartName, Analyser analyser) throws Exception {
+        AbstractChartCreator chart = getChartCreator(chartName);
+        chart.setChartCreator(analyser.getArray(), analyser.getParameters(), graphWidth, graphHeight);
+        return chart.getChart();
+    }
+
+    public BufferedImage getWindowChartImage(String chartName, Analyser analyser) throws Exception {
+        AbstractChartCreator chart = getChartCreator(chartName);
+        analyser.setWindow(windowStart, windowEnd);
+        chart.setChartCreator(analyser.getWindowArray(), analyser.getWindowParameters(), graphWidth, graphHeight);
+        return chart.getChart();
+    }
+    public BufferedImage getChartImage(Analyser analyser) throws Exception {
+        return getChartImage(
                 (String) analyser.getParameters().get("Graph"),
                 analyser);
     }

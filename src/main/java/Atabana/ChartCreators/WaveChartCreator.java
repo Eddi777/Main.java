@@ -1,4 +1,4 @@
-package Atabana.Lib;
+package Atabana.ChartCreators;
 
 import java.awt.*;
 
@@ -8,9 +8,9 @@ import java.awt.*;
  * X axis is center aligned
 **/
 
-public class GraphImageSoundWave extends GraphImage{
+public class WaveChartCreator extends AbstractChartCreator {
     @Override
-    protected void createGraphImage() throws Exception {
+    protected void createChart() throws Exception {
         Graphics2D chart = super.graph.createGraphics();
         int max = data.stream().map(e -> (int) e).mapToInt(Integer::new).max().getAsInt();
         int min = data.stream().map(e -> (int) e).mapToInt(Integer::new).min().getAsInt();

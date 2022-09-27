@@ -1,5 +1,4 @@
-import Atabana.Lib.Analyser;
-import Atabana.Lib.GraphImage;
+import Atabana.Analysers.Analyser;
 
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -9,9 +8,9 @@ public class GraphObject {
 
     String name;
     Analyser analyser;
-    ArrayList<?> graphData;
-    Map<String, Object> graphParams;
-    BufferedImage graph;
+    ArrayList<?> chartData;
+    Map<String, Object> chartParams;
+    BufferedImage chart;
 
     public GraphObject(String name) {
         this.name = name;

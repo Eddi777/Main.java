@@ -1,15 +1,14 @@
-package Atabana.Lib;
+package Atabana.FileReaders;
 
-import Atabana.Lib.Libs.Endian;
+import Atabana.Lib.Endian;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.*;
 
-public class ReadFileMP3 implements ReadFile{
+public class WaveFileReader implements FileReader {
 
     private final int HEADER_SIZE = 44; // There are 44 bytes before the data section in WAV
     private byte[] rowFileByteArray;
-    BasicMP3FileReader basicMP3FileReader;
 
     @Override
     public int getHeaderSize() {
@@ -25,7 +24,7 @@ public class ReadFileMP3 implements ReadFile{
     public boolean isCorrectFormat(byte[] header) {
         return (new String(Arrays.copyOfRange(header,0,4), StandardCharsets.UTF_8).equals("RIFF") &&
                 new String(Arrays.copyOfRange(header,8,12), StandardCharsets.UTF_8).equals("WAVE") &&
-                ReadFile.intFromByteArray(
+                FileReader.intFromByteArray(
                         Arrays.copyOfRange(header,20,22),
                         Endian.LITTLE, true) == 1);
     }
@@ -33,18 +32,12 @@ public class ReadFileMP3 implements ReadFile{
     @Override
     public int[] getWaveArray() {
         int bytesPerSample = getBitsPerSample()/8;
-        int step = bytesPerSample * getNumChannels();
-        int posRowFile = HEADER_SIZE;
-        int posWaveArray = 0;
-        int[] waveArray = new int[rowFileByteArray.length / step];
-        while (posRowFile < rowFileByteArray.length) {
-            waveArray[posWaveArray] = ReadFile.intFromByteArray(
-                            Arrays.copyOfRange(rowFileByteArray,posRowFile,posRowFile + bytesPerSample),
-                            Endian.LITTLE, false);
-            posWaveArray++;
-            posRowFile += step;
-        }
-        return waveArray;
+        return FileReader.getWaveArrayFromByteArray(
+                Arrays.copyOfRange(rowFileByteArray, HEADER_SIZE, rowFileByteArray.length),
+                bytesPerSample,
+                getNumChannels(),
+                Endian.LITTLE,
+                false);
     }
 
     @Override
@@ -56,19 +49,19 @@ public class ReadFileMP3 implements ReadFile{
 
     @Override
     public int getNumChannels() {
-        return ReadFile.intFromByteArray(
+        return FileReader.intFromByteArray(
                 Arrays.copyOfRange(rowFileByteArray,22,24), Endian.LITTLE, true);
     }
 
     @Override
     public int getSampleRate() {
-        return ReadFile.intFromByteArray(
+        return FileReader.intFromByteArray(
                 Arrays.copyOfRange(rowFileByteArray,24,28), Endian.LITTLE, true);
     }
 
     @Override
     public int getBitsPerSample() {
-        return ReadFile.intFromByteArray(
+        return FileReader.intFromByteArray(
                 Arrays.copyOfRange(rowFileByteArray,34,36), Endian.LITTLE, true);
     }
 }

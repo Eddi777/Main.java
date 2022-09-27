@@ -1,7 +1,7 @@
-package Atabana.Lib;
+package Atabana.Analysers;
 
 import Atabana.Atabana;
-import Atabana.Lib.Libs.SoundChunk;
+import Atabana.Lib.SoundChunk;
 import org.apache.commons.math3.complex.Complex;
 import org.apache.commons.math3.transform.DftNormalization;
 import org.apache.commons.math3.transform.FastFourierTransformer;
@@ -9,86 +9,26 @@ import org.apache.commons.math3.transform.TransformType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
 
-public class SpectrogramAnalyser implements Analyser {
+public class SpectrogramAnalyser extends AbstractAnalyser implements Analyser {
 
         //Constants
     private static final SoundChunk SOUND_CHUNK = SoundChunk.EXTRA_SHORT;
-    private final Atabana source;
-
-        //Object variables
-    private int posStart; //Start position for wave window
-    private int posEnd; //Final position for wave window
     private int chunkSize; //Chunk size in output array vs input array
     int maxFreqArrayItems; //Max quantity of frequencies in output list
-
     private FastFourierTransformer fft = new FastFourierTransformer(DftNormalization.STANDARD);
 
-
-    //Outputs
-    private ArrayList<Object> output; //return data - list of Objects (type is indicates in Parameters), could be 2D (array) and 3D (array of arrays
-    private boolean isReady = false; //Flag that this Analyser have filled by necessary data
-
     public SpectrogramAnalyser(Atabana source) {
-        this.source = source;
+        super(source);
     }
 
-    @Override
-    public Map<String, Object> getParameters() throws Exception {
-        if (!isReady) {
-            execute();
-        }
-        Map<String, Object> res = new HashMap<>();
-        res.put("Analyser", "Spectrogram"); // Name of Analyser
-        res.put("Values", "double[]"); //Type of values in ArrayList
-        res.put("Chunk size", chunkSize); //Chunk size in output array vs input array
-        res.put("Graph", "GraphImageSpectrogram"); //Name of recommended graph image creator
-        res.put("Average", 0.0);
-        res.put("FrequencyArray", getMaxFrequency());
-        res.put("MaxFrequency", source.getMaxFrequency());
-        res.put("GraphName", "Spectrogram"); //name for output graph
-        res.put("End", output.size()); //Position of last value
-        return res;
-    }
-
-    @Override
-    public ArrayList<Object> getArray() throws Exception {
-        if (!isReady) {
-            execute();
-        }
-        return output;
-    }
-
-    @Override
-    public void setWindow(int start, int end) {
-        posStart = start;
-        posEnd = end;
-    }
-
-    @Override
-    public Map<String, Object> getWindowParameters() throws Exception {
-        Map<String, Object> res = getParameters();
-        res.replace("Start", posStart); //Position of 1st value
-        res.replace("End",posEnd); //Position of last value
-        return res;
-    }
-
-    @Override
-    public ArrayList<Object> getWindowArray() throws Exception {
-        if (!isReady) {
-            execute();
-        }
-        return (ArrayList<Object>) output.subList(posStart, posEnd);
-    }
-
-    private void execute() throws Exception {
-        chunkSize = SoundChunk.getChunkSize(SOUND_CHUNK, source.getSampleRate());
-        output = new ArrayList<>();
+    protected void execute() throws Exception {
+        if (chunkSize == 0)
+            chunkSize = SoundChunk.getChunkSize(SOUND_CHUNK, source.getSampleRate());
 
         //set max quantity of frequencies in output list
         maxFreqArrayItems = chunkSize * source.getMaxFrequency()/source.getSampleRate();
+        output = new ArrayList<>();
 
         //Window normalization array
         double[] win = getWindowFunction(chunkSize);
@@ -118,7 +58,19 @@ public class SpectrogramAnalyser implements Analyser {
         } catch (Exception e) {
             throw new Exception("Internal exception in the analyser - " + this.getClass());
         }
-        this.posEnd = output.size();
+
+        //Set parameters
+        params.put("Analyser", "Spectrogram"); // Name of Analyser
+        params.put("Values", "double[]"); //Type of values in ArrayList
+        params.put("Chunk size", chunkSize); //Chunk size in output array vs input array
+        params.put("Graph", "Spectrogram"); //Name of recommended graph image creator
+        params.put("Average", 0.0);
+        params.put("FrequencyArray", getMaxFrequency());
+        params.put("MaxFrequency", source.getMaxFrequency());
+        params.put("GraphName", "Spectrogram"); //name for output graph
+        params.put("Chunks", output.size()); //Position of last value
+
+        // set ready flag
         this.isReady = true;
     }
 
@@ -138,5 +90,10 @@ public class SpectrogramAnalyser implements Analyser {
         }
         return res;
     }
-
+    protected ArrayList<Object> getAnalyserWindowArray(int posStart, int posEnd) throws Exception {
+        if (chunkSize == 0)
+            SoundChunk.getChunkSize(SOUND_CHUNK, source.getSampleRate());
+        int subChunkSize = chunkSize / source.getChunkDevider();
+        return new ArrayList<Object>(output.subList(posStart / subChunkSize, posEnd / subChunkSize));
+    }
 }

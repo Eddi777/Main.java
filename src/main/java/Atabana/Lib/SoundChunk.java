@@ -1,4 +1,4 @@
-package Atabana.Lib.Libs;
+package Atabana.Lib;
 
 
 /**

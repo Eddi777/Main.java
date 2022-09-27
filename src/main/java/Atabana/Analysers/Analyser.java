@@ -1,4 +1,4 @@
-package Atabana.Lib;
+package Atabana.Analysers;
 
 import Atabana.Atabana;
 

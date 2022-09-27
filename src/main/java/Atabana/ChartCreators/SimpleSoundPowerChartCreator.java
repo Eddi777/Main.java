@@ -1,6 +1,4 @@
-package Atabana.Lib;
-
-import Atabana.Lib.GraphImage;
+package Atabana.ChartCreators;
 
 import java.awt.*;
 
@@ -11,10 +9,10 @@ import java.awt.*;
  * Y axis is 0 in the top goes to minus
  **/
 
-public class GraphImageSimpleSoundPower extends GraphImage {
+public class SimpleSoundPowerChartCreator extends AbstractChartCreator {
 
     @Override
-    protected void createGraphImage() throws Exception {
+    protected void createChart() throws Exception {
         Graphics2D chart = super.graph.createGraphics();
         int max = (int) data.stream().map(e -> (double) e).mapToDouble(Double::new).max().getAsDouble();
         int min = (int) data.stream().map(e -> (double) e).mapToDouble(Double::new).min().getAsDouble();

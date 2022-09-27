@@ -1,8 +1,7 @@
-package Atabana.Lib;
+package Atabana.ChartCreators;
 
 
 import java.awt.*;
-import java.awt.image.BufferedImage;
 import java.util.Arrays;
 
 /**
@@ -12,12 +11,12 @@ import java.util.Arrays;
  * Y axis is 0 in the top goes to minus
  **/
 
-public class GraphImageSpectrogram extends GraphImage {
+public class SpectrogramChartCreator extends AbstractChartCreator {
 
     int colorCoeff;
 
     @Override
-    protected void createGraphImage() throws Exception {
+    protected void createChart() throws Exception {
         boolean logModeEnabled = true;
         Graphics2D chart = super.graph.createGraphics();
 

@@ -54,7 +54,7 @@ public class GraphBuilder {
         Graphics2D chart = image.createGraphics();
         int i = 0;
         for (GraphObject item: graphs) {
-            chart.drawImage(item.graph, 0, i * graphHeight,null);
+            chart.drawImage(item.chart, 0, i * graphHeight,null);
             i++;
         }
         chart.dispose();
